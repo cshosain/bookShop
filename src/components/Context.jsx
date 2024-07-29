@@ -161,6 +161,18 @@ export const booksContext = createContext([]);
 const BookProvider = (props) => {
   const [booksObject, setBooksObject] = useState(books);
   const [searchHistoryArray, setSearchHistoryArray] = useState([]);
+  const [deletedBooksId, setDelatedBooksId] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [editBookInfo, setEditBookInfo] = useState({
+    id: null,
+    name: "",
+    coverImg: "#",
+    author: "",
+    published_year: null,
+    price: null,
+    rating: null,
+    favourite: null,
+  });
   const handleAddBook = (newBook) => {
     setBooksObject([...booksObject, newBook]);
   };
@@ -172,6 +184,12 @@ const BookProvider = (props) => {
         setBooksObject,
         searchHistoryArray,
         setSearchHistoryArray,
+        deletedBooksId,
+        setDelatedBooksId,
+        editBookInfo,
+        setEditBookInfo,
+        editMode,
+        setEditMode,
       }}
     >
       {props.children}

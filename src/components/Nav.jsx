@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 import BookList from "./BookList.jsx";
@@ -9,35 +10,38 @@ import { booksContext } from "./Context";
 const Nav = () => {
   const {
     booksObject,
-    handleAddBook,
     setBooksObject,
     searchHistoryArray,
     setSearchHistoryArray,
+    deletedBooksId,
   } = useContext(booksContext);
   const options = ["Price", "Relase Year", "Author"];
-  const [selectedOption, setSelectedOption] = useState(["Select an option"]);
+  const [selectedOption, setSelectedOption] = useState("Select an option");
   const [searchTerm, setSearchTerm] = useState("");
   const [isPopup, setIsPopup] = useState(false);
 
   useEffect(() => {
+    console.log("need to sort");
+    performSorting();
+  }, [booksObject.length]);
+  useEffect(() => {
     if (searchTerm) {
-      console.log("perform filtering under useeffect");
       performFiltering();
-    }
-    // console.log("searchHistoryArray: ", searchHistoryArray);
-    else {
+    } else {
+      console.log(
+        "no search term and searchHistoryArray length is: ",
+        searchHistoryArray.length
+      );
       if (searchHistoryArray.length > 0) {
-        setBooksObject(searchHistoryArray[0]); //no change
+        // setBooksObject(searchHistoryArray[0]); //no change
+        console.log("No change");
         performSorting(searchHistoryArray[0]);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
   useEffect(() => {
-    console.log("use effect of ferform sorting");
     performSorting();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedOption]);
 
   //useEffeect (for filtering) must required because the filtering task need performed after the searchTerm upgradation by setSearchTerm()
@@ -47,6 +51,27 @@ const Nav = () => {
     //instead it will start working with taking immediate previous value of searchTerm
     //because state update is asynchronous
   };
+  //given function works remain 7/19/23. need to filter all sortedBooks where not in ids
+  function filterByDelatedBooksId(sortedBooks, ids) {
+    let returnArray = [];
+    let myIds = [...new Set(ids.slice())];
+    let mySortedBooks = sortedBooks.slice();
+    let bookRange = mySortedBooks.length;
+    let idsRange = myIds.length;
+    for (let i = 0; i < bookRange; i++) {
+      let mem = mySortedBooks[i];
+      for (let j = 0; j < idsRange; j++) {
+        if (mySortedBooks[i].id == myIds[j]) {
+          mem = false;
+          j = idsRange;
+        }
+      }
+      if (mem) {
+        returnArray.push(mem);
+      }
+    }
+    return returnArray;
+  }
 
   function performSorting(optionalNewBook = booksObject) {
     if (selectedOption !== "Select an option") {
@@ -64,32 +89,29 @@ const Nav = () => {
         }
       });
       setSearchHistoryArray([...searchHistoryArray, sortedBooks]);
-      setBooksObject(sortedBooks);
+
+      setBooksObject(filterByDelatedBooksId(sortedBooks, deletedBooksId));
+      console.log("state updated!");
     } else {
-      console.log("unchanged booksObject ", booksObject);
-      setBooksObject((prevBooksObject) => {
-        prevBooksObject;
-      }); // Reset to original data
+      setSearchHistoryArray([...searchHistoryArray, optionalNewBook]);
+      setBooksObject(filterByDelatedBooksId(optionalNewBook, deletedBooksId));
     }
   }
 
   function performFiltering() {
-    console.log("perform filtering and searchTerm value: ", searchTerm);
     if (searchTerm) {
-      let filteredBooks = booksObject.filter((book) =>
-        book.name.toLowerCase().includes(searchTerm.toLowerCase())
-      ); // need to set initial value
       if (searchHistoryArray.length > 0) {
-        filteredBooks = searchHistoryArray[0].filter((book) =>
+        let filteredBooks = searchHistoryArray[0].filter((book) =>
           book.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
+        performSorting(filteredBooks);
+      } else {
+        let filteredBooks = booksObject.filter((book) =>
+          book.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        performSorting(filteredBooks);
       }
-      //new approach
-      console.log(booksObject);
-
-      performSorting(filteredBooks);
     } else {
-      console.log("entered else block of filtering ", booksObject);
       if (searchHistoryArray.length > 0) {
         setBooksObject(searchHistoryArray[0]); //no change
         performSorting(searchHistoryArray[0]);
@@ -135,10 +157,8 @@ const Nav = () => {
           />
         </div>
       </nav>
-      {isPopup && (
-        <Popup setIsPopup={setIsPopup} handleAddBook={handleAddBook} />
-      )}
-      <BookList books={booksObject} />
+      {isPopup && <Popup setIsPopup={setIsPopup} />}
+      <BookList setIsPopup={setIsPopup} books={booksObject} />
     </>
   );
 };
