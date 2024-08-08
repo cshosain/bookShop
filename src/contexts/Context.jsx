@@ -163,6 +163,10 @@ const BookProvider = (props) => {
   const [searchHistoryArray, setSearchHistoryArray] = useState([]);
   const [deletedBooksId, setDelatedBooksId] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  const [confirmDel, setConfirmDel] = useState({
+    presence: false,
+    bookId: "",
+  });
   const [editBookInfo, setEditBookInfo] = useState({
     id: null,
     name: "",
@@ -190,6 +194,8 @@ const BookProvider = (props) => {
         setEditBookInfo,
         editMode,
         setEditMode,
+        confirmDel,
+        setConfirmDel,
       }}
     >
       {props.children}

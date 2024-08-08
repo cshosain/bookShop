@@ -2,11 +2,12 @@
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 import BookList from "./BookList.jsx";
-import styles from "./Nav.module.css"; // Import using CSS Modules
+import styles from "../styles_modules/Nav.module.css"; // Import using CSS Modules
 // import books from "./data";
 import Popup from "./Popup.jsx";
 import { useState, useEffect, useContext } from "react";
-import { booksContext } from "./Context";
+import { booksContext } from "../contexts/Context.jsx";
+import DelConformation from "./DelConformation.jsx";
 const Nav = () => {
   const {
     booksObject,
@@ -14,7 +15,9 @@ const Nav = () => {
     searchHistoryArray,
     setSearchHistoryArray,
     deletedBooksId,
+    confirmDel,
   } = useContext(booksContext);
+  console.log(confirmDel);
   const options = ["Price", "Relase Year", "Author"];
   const [selectedOption, setSelectedOption] = useState("Select an option");
   const [searchTerm, setSearchTerm] = useState("");
@@ -157,7 +160,14 @@ const Nav = () => {
           />
         </div>
       </nav>
-      {isPopup && <Popup setIsPopup={setIsPopup} />}
+      {isPopup && (
+        <Popup
+          setIsPopup={setIsPopup}
+          performSorting={performSorting}
+          selectedOption={selectedOption}
+        />
+      )}
+      {confirmDel.presence && <DelConformation />}
       <BookList setIsPopup={setIsPopup} books={booksObject} />
     </>
   );

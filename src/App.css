@@ -80,3 +80,43 @@ input[type="checkbox"] {
 form label span {
   color: white;
 }
+
+.button-1 {
+  background-color: #3ec34e;
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  height: 40px;
+  line-height: 20px;
+  list-style: none;
+  margin: 7px 12px 0 0;
+  outline: none;
+  padding: 10px 16px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  transition: color 100ms;
+  vertical-align: baseline;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  z-index: 1;
+}
+
+.button-1:hover,
+.button-1:focus {
+  background-color: #f082ac;
+}
+.button-1:disabled {
+  opacity: 0.5;
+}
+.makeRedBg {
+  background-color: rgb(212, 160, 64);
+}

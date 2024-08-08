@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import BookCard from "./BookCard";
-import style from "./Nav.module.css";
+import style from "../styles_modules/Nav.module.css";
 const BookList = ({ books, setIsPopup }) => {
   return (
     <div className={style.bookGrid}>

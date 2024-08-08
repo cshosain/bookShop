@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "./Nav.module.css";
+import styles from "../styles_modules/Nav.module.css";
 function SearchBar() {
   const [searchTerm, setSearchTerm] = useState("");
 

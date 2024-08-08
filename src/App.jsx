@@ -4,7 +4,7 @@ import Nav from "./components/Nav";
 // import BattingOrder from "./components/BattingOrder";
 // import booksContext from "./components/Context.js";
 // eslint-disable-next-line no-unused-vars
-import BookProvider from "./components/Context";
+import BookProvider from "./contexts/Context";
 function App() {
   return (
     <>
