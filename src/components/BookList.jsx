@@ -5,7 +5,7 @@ const BookList = ({ books, setIsPopup }) => {
   return (
     <div className={style.bookGrid}>
       {books.map((book) => (
-        <BookCard setIsPopup={setIsPopup} key={book.id} book={book} />
+        <BookCard setIsPopup={setIsPopup} key={book._id} book={book} />
       ))}
     </div>
   );

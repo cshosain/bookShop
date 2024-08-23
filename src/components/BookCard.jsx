@@ -3,40 +3,20 @@ import { useContext } from "react";
 import style from "../styles_modules/Nav.module.css";
 import { booksContext } from "../contexts/Context";
 const BookCard = ({ book, setIsPopup }) => {
-  const {
-    // booksObject,
-    // setBooksObject,
-    // deletedBooksId,
-    // setDelatedBooksId,
-    setEditBookInfo,
-    editMode,
-    setEditMode,
-    confirmDel,
-    setConfirmDel,
-  } = useContext(booksContext);
-  console.log(confirmDel);
-
-  // function deleteBook(bookIdToBeDelete) {
-  //     console.log("Deletion starting");
-  //     const newBooks = booksObject.filter(
-  //       (item) => item.id != bookIdToBeDelete
-  //     );
-  //     setBooksObject(newBooks);
-  //     console.log(deletedBooksId);
-  // }
-  // se
+  const { setEditBookInfo, editMode, setEditMode, confirmDel, setConfirmDel } =
+    useContext(booksContext);
   function editBook() {
     setEditMode(true);
     setIsPopup(true);
     setEditBookInfo({
-      id: book.id,
+      id: book._id,
       name: book.name,
       coverImg: book.coverImg,
       author: book.author,
       published_year: book.published_year,
       price: book.price,
       rating: book.rating,
-      favourite: book.favourite,
+      favourite: book.isFavorite,
     });
   }
   return (
@@ -50,7 +30,7 @@ const BookCard = ({ book, setIsPopup }) => {
         <p>Published: {book.published_year}</p>
         <p>Price: ${book.price.toFixed(2)}</p>
         <p>Rating: {book.rating} stars</p>
-        {book.favourite && <p className={style.favouriteTag}>Favourite</p>}
+        {book.isFavorite && <p className={style.favouriteTag}>Favourite</p>}
         <button
           className="button-1 makeRedBg"
           onClick={() => {
@@ -58,7 +38,7 @@ const BookCard = ({ book, setIsPopup }) => {
             setConfirmDel({
               ...confirmDel,
               presence: true,
-              bookId: book.id,
+              bookId: book._id,
             });
           }}
         >

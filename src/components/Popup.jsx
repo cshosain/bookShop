@@ -2,8 +2,9 @@
 import { booksContext } from "../contexts/Context";
 import styles from "../styles_modules/Nav.module.css"; // Import using CSS Modules
 import { useContext, useReducer, useState } from "react";
+import axios from "axios";
 
-const Popup = ({ setIsPopup, performSorting, selectedOption }) => {
+const Popup = ({ setIsPopup, performSorting }) => {
   const [error, setError] = useState({
     name: "",
     author: "",
@@ -99,19 +100,11 @@ const Popup = ({ setIsPopup, performSorting, selectedOption }) => {
         return state;
     }
   }
-  const {
-    booksObject,
-    setBooksObject,
-    handleAddBook,
-    searchHistoryArray,
-    setSearchHistoryArray,
-    editBookInfo,
-    editMode,
-    setEditMode,
-  } = useContext(booksContext);
+  const { handleAddBook, editBookInfo, editMode, setEditMode, loadAllBooks } =
+    useContext(booksContext);
   const myEditBookInfo = JSON.parse(JSON.stringify(editBookInfo));
   const initialState = {
-    id: editMode && myEditBookInfo.id ? myEditBookInfo.id : Date.now(),
+    id: editMode && myEditBookInfo.id ? myEditBookInfo.id : null,
     name: editMode && myEditBookInfo.name ? myEditBookInfo.name : "",
     coverImg:
       editMode && myEditBookInfo.coverImg ? myEditBookInfo.coverImg : "#",
@@ -147,7 +140,6 @@ const Popup = ({ setIsPopup, performSorting, selectedOption }) => {
     if (!preventSubmissionIfErrors(error)) {
       const formData = state;
       preparedSingleBook = {
-        id: state.id,
         name: formData.name,
         coverImg: state.coverImg,
         author: formData.author,
@@ -157,52 +149,31 @@ const Popup = ({ setIsPopup, performSorting, selectedOption }) => {
         favourite: formData.favourite,
       };
       if (editMode) {
-        let updatedBooks = booksObject.map((book) => {
-          if (book.id == preparedSingleBook.id) {
-            return {
-              id: preparedSingleBook.id,
-              name: preparedSingleBook.name,
-              coverImg: preparedSingleBook.coverImg,
-              author: preparedSingleBook.author,
-              published_year: preparedSingleBook.published_year,
-              price: preparedSingleBook.price,
-              rating: preparedSingleBook.rating,
-              favourite: preparedSingleBook.favourite,
-            };
-          } else return book;
-        });
-        //here performSorting also do the state update job but right after sorting
-        //and there is no need of ferther sorting after update a book when there is no selected option
-        selectedOption !== "Select an option"
-          ? performSorting(updatedBooks)
-          : setBooksObject(updatedBooks);
-        //gettin the updated book for update the history array with this updated book just at the place of this desired book, other remain unchanged.
-        const updatedBook = updatedBooks.find(
-          (book) => book.id == preparedSingleBook.id
-        );
-        let nextHistoryArray = [
-          [
-            ...searchHistoryArray[0].map((book) => {
-              if (book.id == preparedSingleBook.id) {
-                return {
-                  ...updatedBook,
-                };
-              } else return book;
-            }),
-          ],
-          ...searchHistoryArray.slice(1),
-        ];
-        setSearchHistoryArray(nextHistoryArray);
+        console.log("state.favourite: ", state.favourite);
+        //patch operation for update desired book/ e.g. current return{} part
+        axios
+          .patch(
+            `https://book-shop-backend-sooty.vercel.app/api/v1/books/${state.id}`,
+            {
+              isFavorite: state.favourite, //remaining task >> faborite can not become false while updating
+              name: state.name,
+              // coverImg: state.coverImg,
+              author: state.author,
+              published_year: state.published_year,
+              price: state.price,
+              rating: state.rating,
+            }
+          )
+          .then((res) => {
+            console.log(res.data.data);
+            console.log(res.data.message);
+            loadAllBooks();
+          })
+          .catch((error) => console.log(error));
+        //end api task
       } else {
         handleAddBook(preparedSingleBook);
-        //keeping record of recently added book first then rest of the books
-        let makeFirstSearchHistory = [
-          [preparedSingleBook, ...searchHistoryArray[0]],
-        ];
-        console.log(makeFirstSearchHistory);
-        setSearchHistoryArray(makeFirstSearchHistory);
       }
-      //bringing the new added book firt index of currently all books then currently all books array set into history array
       setIsPopup(false);
       setEditMode(false);
     } else {
@@ -269,16 +240,6 @@ const Popup = ({ setIsPopup, performSorting, selectedOption }) => {
         {error.rating && (
           <p style={{ color: "red", margin: "0" }}>{error.rating}</p>
         )}
-
-        {/* <input
-          type="checkbox"
-          // value={true}
-          checked={state.favourite}
-          name="isFavourite"
-          onChange={handleChange}
-          style={{ margin: "7px", scale: "2" }}
-        />
-        <label htmlFor="isFavourite">Add to favourite</label> */}
         <label htmlFor="checkbox" className="checkbox--label">
           <input
             type="checkbox"

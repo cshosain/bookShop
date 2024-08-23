@@ -2,126 +2,45 @@
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 import BookList from "./BookList.jsx";
+import SearchBar from "./SearchBar.jsx";
+import SearchElement from "./SearchElement.jsx";
 import styles from "../styles_modules/Nav.module.css"; // Import using CSS Modules
 // import books from "./data";
 import Popup from "./Popup.jsx";
 import { useState, useEffect, useContext } from "react";
 import { booksContext } from "../contexts/Context.jsx";
 import DelConformation from "./DelConformation.jsx";
+import axios from "axios";
 const Nav = () => {
   const {
     booksObject,
     setBooksObject,
-    searchHistoryArray,
-    setSearchHistoryArray,
-    deletedBooksId,
     confirmDel,
+    selectedOption,
+    setSelectedOption,
+    performSorting,
   } = useContext(booksContext);
   console.log(confirmDel);
   const options = ["Price", "Relase Year", "Author"];
-  const [selectedOption, setSelectedOption] = useState("Select an option");
-  const [searchTerm, setSearchTerm] = useState("");
   const [isPopup, setIsPopup] = useState(false);
 
+  //create a new useeffect with empty array as dependency for default get operaion when this component rendered
+  //and set booksObject
   useEffect(() => {
-    console.log("need to sort");
-    performSorting();
-  }, [booksObject.length]);
-  useEffect(() => {
-    if (searchTerm) {
-      performFiltering();
-    } else {
-      console.log(
-        "no search term and searchHistoryArray length is: ",
-        searchHistoryArray.length
-      );
-      if (searchHistoryArray.length > 0) {
-        // setBooksObject(searchHistoryArray[0]); //no change
-        console.log("No change");
-        performSorting(searchHistoryArray[0]);
-      }
-    }
-  }, [searchTerm]);
+    axios
+      .get("https://book-shop-backend-sooty.vercel.app/api/v1/books")
+      .then((res) => {
+        setBooksObject(res.data.data.books);
+        console.log(res.data.data.books);
+        console.log(res.data.message);
+      })
+      .catch((error) => console.log(error));
+  }, []);
 
   useEffect(() => {
     performSorting();
   }, [selectedOption]);
 
-  //useEffeect (for filtering) must required because the filtering task need performed after the searchTerm upgradation by setSearchTerm()
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value);
-    //performFiltering(); here can not do work because right now the searchTerm does not become empty
-    //instead it will start working with taking immediate previous value of searchTerm
-    //because state update is asynchronous
-  };
-  //given function works remain 7/19/23. need to filter all sortedBooks where not in ids
-  function filterByDelatedBooksId(sortedBooks, ids) {
-    let returnArray = [];
-    let myIds = [...new Set(ids.slice())];
-    let mySortedBooks = sortedBooks.slice();
-    let bookRange = mySortedBooks.length;
-    let idsRange = myIds.length;
-    for (let i = 0; i < bookRange; i++) {
-      let mem = mySortedBooks[i];
-      for (let j = 0; j < idsRange; j++) {
-        if (mySortedBooks[i].id == myIds[j]) {
-          mem = false;
-          j = idsRange;
-        }
-      }
-      if (mem) {
-        returnArray.push(mem);
-      }
-    }
-    return returnArray;
-  }
-
-  function performSorting(optionalNewBook = booksObject) {
-    if (selectedOption !== "Select an option") {
-      const sortedBooks = optionalNewBook.slice().sort((a, b) => {
-        switch (selectedOption) {
-          case "Price":
-            return a.price - b.price;
-          case "Relase Year":
-            return a.published_year - b.published_year;
-          case "Author":
-            // Assuming author is a string, sort alphabetically
-            return a.author.localeCompare(b.author);
-          default:
-            return 0; // No change
-        }
-      });
-      setSearchHistoryArray([...searchHistoryArray, sortedBooks]);
-
-      setBooksObject(filterByDelatedBooksId(sortedBooks, deletedBooksId));
-      console.log("state updated!");
-    } else {
-      setSearchHistoryArray([...searchHistoryArray, optionalNewBook]);
-      setBooksObject(filterByDelatedBooksId(optionalNewBook, deletedBooksId));
-    }
-  }
-
-  function performFiltering() {
-    if (searchTerm) {
-      if (searchHistoryArray.length > 0) {
-        let filteredBooks = searchHistoryArray[0].filter((book) =>
-          book.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        performSorting(filteredBooks);
-      } else {
-        let filteredBooks = booksObject.filter((book) =>
-          book.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        performSorting(filteredBooks);
-      }
-    } else {
-      if (searchHistoryArray.length > 0) {
-        setBooksObject(searchHistoryArray[0]); //no change
-        performSorting(searchHistoryArray[0]);
-      }
-      console.log("i need work here");
-    }
-  }
   const handleChange_combo = (event) => {
     setSelectedOption(event.value);
   };
@@ -129,26 +48,19 @@ const Nav = () => {
   return (
     <>
       <nav className={styles.navs}>
-        <div>
-          <input
-            className={styles.navSearch}
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={handleChange}
-          />
-          <button className="bg-red-300 rounded-md p-2 hover:bg-red-400">
-            Seacrh
-          </button>
+        <div className={styles.searchArea}>
+          <SearchBar />
           {!isPopup && (
-            <button
-              onClick={() => {
-                setIsPopup(true);
-              }}
-              className="bg-green-500 rounded-md p-2 hover:bg-yellow-400"
-            >
-              Add a Book
-            </button>
+            <div>
+              <button
+                onClick={() => {
+                  setIsPopup(true);
+                }}
+                className="bg-green-500 rounded-md p-2 font-semibold hover:bg-yellow-400"
+              >
+                Add a Book
+              </button>
+            </div>
           )}
         </div>
         <div>
@@ -168,6 +80,7 @@ const Nav = () => {
         />
       )}
       {confirmDel.presence && <DelConformation />}
+      <SearchElement />
       <BookList setIsPopup={setIsPopup} books={booksObject} />
     </>
   );

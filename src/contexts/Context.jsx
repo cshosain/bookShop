@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { createContext, useState } from "react";
-
+import axios from "axios";
 const books = [
   {
     id: 1,
@@ -159,7 +159,10 @@ const books = [
 
 export const booksContext = createContext([]);
 const BookProvider = (props) => {
-  const [booksObject, setBooksObject] = useState(books);
+  const [booksObject, setBooksObject] = useState([]);
+  const [searchResult, setSearchResult] = useState([]);
+  const [searchResultVisibility, setSearchResultVisibility] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("Select an option");
   const [searchHistoryArray, setSearchHistoryArray] = useState([]);
   const [deletedBooksId, setDelatedBooksId] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -178,16 +181,67 @@ const BookProvider = (props) => {
     favourite: null,
   });
   const handleAddBook = (newBook) => {
-    setBooksObject([...booksObject, newBook]);
+    //nee to post opration for add a new book
+    //setBooksObject([...booksObject, newBook]);
+    axios
+      .post("https://book-shop-backend-sooty.vercel.app/api/v1/books", newBook)
+      .then((res) => {
+        console.log(res.data.data);
+        console.log(res.data.message);
+        loadAllBooks();
+      })
+      .catch((error) => console.log(error));
   };
+  const loadAllBooks = () => {
+    axios
+      .get("https://book-shop-backend-sooty.vercel.app/api/v1/books")
+      .then((res) => {
+        selectedOption == "Select an option"
+          ? setBooksObject(res.data.data.books)
+          : performSorting(res.data.data.books);
+
+        console.log(res.data.data.books);
+        console.log(res.data.message);
+
+        console.log("Books refreshed");
+      })
+      .catch((error) => console.log(error));
+  };
+  function performSorting(optionalNewBook = booksObject) {
+    if (selectedOption !== "Select an option") {
+      const sortedBooks = optionalNewBook.slice().sort((a, b) => {
+        switch (selectedOption) {
+          case "Price":
+            return a.price - b.price;
+          case "Relase Year":
+            return a.published_year - b.published_year;
+          case "Author":
+            // Assuming author is a string, sort alphabetically
+            return a.author.localeCompare(b.author);
+          default:
+            return 0; // No change
+        }
+      });
+
+      setBooksObject(sortedBooks);
+      console.log("state updated!");
+    }
+  }
   return (
     <booksContext.Provider
       value={{
         booksObject,
         handleAddBook,
         setBooksObject,
+        searchResult,
+        setSearchResult,
         searchHistoryArray,
         setSearchHistoryArray,
+        searchResultVisibility,
+        setSearchResultVisibility,
+        performSorting,
+        selectedOption,
+        setSelectedOption,
         deletedBooksId,
         setDelatedBooksId,
         editBookInfo,
@@ -196,6 +250,7 @@ const BookProvider = (props) => {
         setEditMode,
         confirmDel,
         setConfirmDel,
+        loadAllBooks,
       }}
     >
       {props.children}
