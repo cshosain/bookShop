@@ -1,9 +1,11 @@
 import { useContext, useEffect, useRef } from "react";
 import { booksContext } from "../contexts/Context";
+import Loading from "./Loading";
 
 export default function SearchElement() {
   const {
     searchResult,
+    isLoading,
     setBooksObject,
     searchResultVisibility,
     setSearchResultVisibility,
@@ -11,6 +13,7 @@ export default function SearchElement() {
   const searchElementRef = useRef(null);
   console.log(searchResultVisibility);
   useEffect(() => {
+    //checks if the click event's target is outside the div referenced by searchElementRef
     const handleClickOutside = (event) => {
       if (
         searchElementRef.current &&
@@ -27,6 +30,7 @@ export default function SearchElement() {
   }, [setSearchResultVisibility]);
   return (
     <div className="searchElements" ref={searchElementRef}>
+      {isLoading && <p>Loading...</p>}
       {searchResultVisibility && (
         <ul>
           {searchResult.map((book) => (

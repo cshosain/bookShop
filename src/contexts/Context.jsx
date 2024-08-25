@@ -161,6 +161,7 @@ export const booksContext = createContext([]);
 const BookProvider = (props) => {
   const [booksObject, setBooksObject] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchResultVisibility, setSearchResultVisibility] = useState(false);
   const [selectedOption, setSelectedOption] = useState("Select an option");
   const [searchHistoryArray, setSearchHistoryArray] = useState([]);
@@ -188,9 +189,13 @@ const BookProvider = (props) => {
       .then((res) => {
         console.log(res.data.data);
         console.log(res.data.message);
+        alert(res.data.message);
         loadAllBooks();
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        alert(error);
+        console.log(error);
+      });
   };
   const loadAllBooks = () => {
     axios
@@ -235,6 +240,8 @@ const BookProvider = (props) => {
         setBooksObject,
         searchResult,
         setSearchResult,
+        isLoading,
+        setIsLoading,
         searchHistoryArray,
         setSearchHistoryArray,
         searchResultVisibility,

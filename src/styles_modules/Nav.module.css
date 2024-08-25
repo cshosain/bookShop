@@ -30,7 +30,7 @@
 .bookCard {
   display: flex; /* Allow image and info side-by-side */
   flex-direction: column; /* Stack info below image on small screens */
-  background-color: #fff; /* Light background */
+  background-color: #d6f3ef; /* Light background */
   border-radius: 4px; /* Rounded corners */
   box-shadow: 0 2px 4px rgb(0, 0, 0); /* Subtle shadow */
   align-items: center;
