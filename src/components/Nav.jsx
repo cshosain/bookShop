@@ -17,31 +17,45 @@ const Nav = () => {
   const {
     booksObject,
     setBooksObject,
+    totalPages,
+    setTotalPages,
+    totalBooks,
+    setTotalBooks,
+    postsPerPage,
     confirmDel,
     selectedOption,
     setSelectedOption,
     performSorting,
+    searchTerm,
+    searchMode,
   } = useContext(booksContext);
-  console.log(confirmDel);
-  const options = ["Price", "Relase Year", "Author"];
   const [isPopup, setIsPopup] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [postsPerPage, setPostsPerPage] = useState(3); //for future dynamically show number of books
+  const [errorMsg, setErrorMsg] = useState(null);
   const [loading, setLoading] = useState(true);
+  // const [postsPerPage, setPostsPerPage] = useState(3);
+  // const [totalPages, setTotalPages] = useState(1);
+  // const [totalBooks, setTotalBooks] = useState(1);
+
   //create a new useeffect with empty array as dependency for default get operaion when this component rendered
   //and set booksObject
   useEffect(() => {
     setLoading(true);
     axios
-      .get("https://book-shop-backend-sooty.vercel.app/api/v1/books")
+      .get(
+        `https://book-shop-backend-sooty.vercel.app/api/v1/books?limit=${postsPerPage}`
+      )
       .then((res) => {
         setLoading(false);
+        setErrorMsg(null);
         setBooksObject(res.data.data.books);
-        console.log(res.data.data.books);
+        setTotalPages(res.data.data.pagination.totalPages);
+        setTotalBooks(res.data.data.pagination.totalBooks);
+        console.log(res.data.data);
         console.log(res.data.message);
       })
       .catch((error) => {
         setLoading(false);
+        setErrorMsg(error.message);
         console.log(error);
       });
   }, []);
@@ -49,11 +63,7 @@ const Nav = () => {
   useEffect(() => {
     performSorting();
   }, [selectedOption]);
-
-  const lastPostIndex = currentPage * postsPerPage;
-  const firstPostIndex = lastPostIndex - postsPerPage;
-  const currentPosts = booksObject.slice(firstPostIndex, lastPostIndex);
-
+  const options = ["Price", "Relase Year", "Author"];
   const handleChange_combo = (event) => {
     setSelectedOption(event.value);
   };
@@ -95,16 +105,19 @@ const Nav = () => {
       {confirmDel.presence && <DelConformation />}
       <SearchElement />
       {loading && <Loading />}
-      <BookList setIsPopup={setIsPopup} books={currentPosts} />
+      <BookList setIsPopup={setIsPopup} books={booksObject} />
       {booksObject.length != 0 ? (
         <Pagination
-          totalPosts={booksObject.length}
+          totalBooks={totalBooks}
+          totalPages={totalPages}
           postsPerPage={postsPerPage}
-          setCurrentPage={setCurrentPage}
-          currentPage={currentPage}
+          loading={loading}
+          setLoading={setLoading}
+          searchTerm={searchTerm}
+          searchMode={searchMode}
         />
       ) : (
-        <h1>No book found!</h1>
+        <h1>{errorMsg}</h1>
       )}
     </>
   );

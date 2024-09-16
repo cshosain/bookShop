@@ -9,7 +9,7 @@ const BookCard = ({ book, setIsPopup }) => {
     setEditMode(true);
     setIsPopup(true);
     setEditBookInfo({
-      id: book._id,
+      _id: book._id,
       name: book.name,
       coverImg: book.coverImg,
       author: book.author,
@@ -28,7 +28,7 @@ const BookCard = ({ book, setIsPopup }) => {
         <h3>{book.name}</h3>
         <p>by {book.author}</p>
         <p>Published: {book.published_year}</p>
-        <p>Price: ${book.price.toFixed(2)}</p>
+        <p>Price: ${parseInt(book.price).toFixed(2)}</p>
         <p>Rating: {book.rating} stars</p>
         {book.isFavorite && <p className={style.favouriteTag}>Favourite</p>}
         <button

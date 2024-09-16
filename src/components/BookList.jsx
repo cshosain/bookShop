@@ -2,6 +2,7 @@
 import BookCard from "./BookCard";
 import style from "../styles_modules/Nav.module.css";
 const BookList = ({ books, setIsPopup }) => {
+  console.log(books);
   return (
     <div className={style.bookGrid}>
       {books.map((book) => (

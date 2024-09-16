@@ -100,11 +100,18 @@ const Popup = ({ setIsPopup, performSorting }) => {
         return state;
     }
   }
-  const { handleAddBook, editBookInfo, editMode, setEditMode, loadAllBooks } =
-    useContext(booksContext);
+  const {
+    handleAddBook,
+    editBookInfo,
+    editMode,
+    booksObject,
+    setBooksObject,
+    setEditMode,
+    loadAllBooks,
+  } = useContext(booksContext);
   const myEditBookInfo = JSON.parse(JSON.stringify(editBookInfo));
   const initialState = {
-    id: editMode && myEditBookInfo.id ? myEditBookInfo.id : null,
+    _id: editMode && myEditBookInfo._id ? myEditBookInfo._id : null,
     name: editMode && myEditBookInfo.name ? myEditBookInfo.name : "",
     coverImg:
       editMode && myEditBookInfo.coverImg ? myEditBookInfo.coverImg : "#",
@@ -150,12 +157,26 @@ const Popup = ({ setIsPopup, performSorting }) => {
       };
       if (editMode) {
         console.log("state.favourite: ", state.favourite);
+        let updatedBooks = booksObject.map((book) => {
+          if (book._id == state._id) {
+            return {
+              _id: state._id,
+              isFavorite: state.favourite,
+              name: state.name,
+              coverImg: state.coverImg,
+              author: state.author,
+              published_year: state.published_year,
+              price: state.price,
+              rating: state.rating,
+            };
+          } else return book;
+        });
         //patch operation for update desired book/ e.g. current return{} part
         axios
           .patch(
-            `https://book-shop-backend-sooty.vercel.app/api/v1/books/${state.id}`,
+            `https://book-shop-backend-sooty.vercel.app/api/v1/books/${state._id}`,
             {
-              isFavorite: state.favourite, //remaining task >> faborite can not become false while updating
+              isFavorite: state.favourite,
               name: state.name,
               // coverImg: state.coverImg,
               author: state.author,
@@ -167,7 +188,10 @@ const Popup = ({ setIsPopup, performSorting }) => {
           .then((res) => {
             console.log(res.data.data);
             console.log(res.data.message);
-            loadAllBooks();
+            console.log(updatedBooks);
+            setBooksObject(updatedBooks); //locally show update result after successfully updated into the db
+            //loadAllBooks();
+            //need to update locally here instead load all books
           })
           .catch((error) => console.log(error));
         //end api task
@@ -184,7 +208,7 @@ const Popup = ({ setIsPopup, performSorting }) => {
     <div className={styles.popup}>
       {console.log(error)}
       <form onSubmit={handleSubmit}>
-        <p>Id: {state.id}</p>
+        <p>Id: {state._id}</p>
         <input
           type="text"
           name="name"

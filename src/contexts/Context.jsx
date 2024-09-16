@@ -161,6 +161,13 @@ export const booksContext = createContext([]);
 const BookProvider = (props) => {
   const [booksObject, setBooksObject] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
+  const [postsPerPage, setPostsPerPage] = useState(10);
+  const [searchMode, setSearchMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalBooks, setTotalBooks] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [btnDisable, setBtnDisable] = useState({ prev: false, next: false });
   const [isLoading, setIsLoading] = useState(false);
   const [searchResultVisibility, setSearchResultVisibility] = useState(false);
   const [selectedOption, setSelectedOption] = useState("Select an option");
@@ -242,6 +249,19 @@ const BookProvider = (props) => {
         setSearchResult,
         isLoading,
         setIsLoading,
+        searchMode,
+        searchTerm,
+        setSearchTerm,
+        setSearchMode,
+        postsPerPage,
+        totalPages,
+        setTotalPages,
+        totalBooks,
+        setTotalBooks,
+        btnDisable,
+        setBtnDisable,
+        currentPage,
+        setCurrentPage,
         searchHistoryArray,
         setSearchHistoryArray,
         searchResultVisibility,

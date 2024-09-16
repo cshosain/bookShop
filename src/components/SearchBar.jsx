@@ -2,15 +2,24 @@ import { useContext, useState } from "react";
 import styles from "../styles_modules/Nav.module.css";
 import axios from "axios";
 import { booksContext } from "../contexts/Context";
+import { useSearchParams } from "react-router-dom";
 function SearchBar() {
-  const [searchTerm, setSearchTerm] = useState("");
   const {
     setIsLoading,
     isLoading,
     setSearchResult,
     setBooksObject,
     setSearchResultVisibility,
+    setTotalPages,
+    setTotalBooks,
+    selectedOption,
+    setSearchMode,
+    searchTerm,
+    setSearchTerm,
+    setBtnDisable,
+    setCurrentPage,
   } = useContext(booksContext);
+  //const [searchParams] = useSearchParams()
 
   const handleInputChange = (event) => {
     setSearchTerm(event.target.value);
@@ -39,18 +48,41 @@ function SearchBar() {
     }, 1000); // Adjust delay (in milliseconds) as needed
   };
   const handleSearch = () => {
+    setSearchMode(true);
     // direct api calls and update booksObject
+    let apiUrl;
     if (searchTerm) {
       setSearchResultVisibility(false);
+      switch (selectedOption) {
+        case "Select an option":
+          apiUrl = `https://book-shop-backend-sooty.vercel.app/api/v1/books?search=${searchTerm}&limit=3`;
+          break;
+        case "Price":
+          apiUrl = `https://book-shop-backend-sooty.vercel.app/api/v1/books?search=${searchTerm}&limit=3&sortBy=price`;
+          break;
+        case "Relase Year":
+          apiUrl = `https://book-shop-backend-sooty.vercel.app/api/v1/books?search=${searchTerm}&limit=3&sortBy=published_year`;
+          break;
+        case "Author":
+          // Assuming author is a string, sort alphabetically
+          apiUrl = `https://book-shop-backend-sooty.vercel.app/api/v1/books?search=${searchTerm}&limit=3&sortBy=author`;
+          break;
+        default:
+          apiUrl = `https://book-shop-backend-sooty.vercel.app/api/v1/books?search=${searchTerm}&limit=3`;
+      }
+
       axios
-        .get(
-          "https://book-shop-backend-sooty.vercel.app/api/v1/books?search=" +
-            searchTerm
-        )
+        .get(apiUrl)
         .then((res) => {
-          console.log(res.data.data.books);
-          console.log(res.data.data.books.length);
+          console.log(res.data.data);
           setBooksObject(res.data.data.books);
+          setTotalPages(res.data.data.pagination.totalPages);
+          setTotalBooks(res.data.data.pagination.totalBooks);
+
+          setCurrentPage(1);
+          res.data.data.pagination.totalPages <= 1
+            ? setBtnDisable({ prev: true, next: true })
+            : setBtnDisable({ prev: true, next: false });
         })
         .catch((err) => {
           console.log(err);
